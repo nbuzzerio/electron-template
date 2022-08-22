@@ -1,6 +1,5 @@
+const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
-
-const { app, BrowserWindow } = require("electron");
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -8,6 +7,8 @@ const createWindow = () => {
     width: 800,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
+      contextIsolation: false,
     },
   });
 
@@ -25,3 +26,27 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
+
+//screen cap
+// Main process
+const { ipcMain, desktopCapturer } = require('electron')
+
+ipcMain.handle(
+  'DESKTOP_CAPTURER_GET_SOURCES',
+  (event, opts) => desktopCapturer.getSources(opts)
+)
+
+const menuItems = [
+  {
+    label: "Menu",
+    submenu: [
+      {
+        label: "sources",
+        click: () => selectSource(source)
+      }
+    ]
+  }
+]
+
+const menu = Menu.buildFromTemplate(menuItems)
+Menu.setApplicationMenu(menu)
